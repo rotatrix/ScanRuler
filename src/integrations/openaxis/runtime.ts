@@ -91,7 +91,7 @@ export function attachOpenAxis(): () => void {
     if (adapter) adapter.lastWrite = undefined
     previousPose = pose
     diagnostics.setEnabled(diagnosticsVisible)
-    const evidence = diagnosticsVisible ? diagnostics.presentation() : undefined
+    const evidence = diagnosticsVisible ? diagnostics.presentation() ?? { revision: 0, lines: [], segments: [], markers: [] } : undefined
     presentation?.draw(evidence && (evidence.context === undefined || evidence.context === context) ? evidence : undefined, context ? status : `${status} — viewport unavailable`)
     frame = requestAnimationFrame(tick)
   }

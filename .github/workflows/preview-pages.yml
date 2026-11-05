@@ -1,0 +1,43 @@
+name: Publish Rotatrix preview
+on:
+  push:
+    branches: [codex/scanruler-preview]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scanruler-preview-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository == 'rotatrix/ScanRuler' && github.ref == 'refs/heads/codex/scanruler-preview'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.1
+      - run: node scripts/setup-openaxis.mjs
+      - run: npm ci --install-links
+      - run: npm run build -- --base /ScanRuler/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.publish.outputs.page_url }}
+    steps:
+      - id: publish
+        uses: actions/deploy-pages@v4

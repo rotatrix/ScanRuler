@@ -55,7 +55,7 @@ in `src/integrations/openaxis/LICENSE`. Changes to ScanRuler source retain
 its AGPL-3.0-only license. OpenAxis itself is separately dual licensed under
 ELv2 or GPL-3.0-only. This AGPL fork uses the GPL-3.0-only option; MIT adapter
 code does not relicense the SDK. Preserve the SDK's LICENSE and LEGAL.md.
-SDK source: https://github.com/rotatrix/openaxis/tree/7b2af2b46946530c1a34be936943d6c499810fcc
+SDK source: https://github.com/rotatrix/openaxis/tree/8f8b5e50e6eb1f3b15e2bd6ebaccc6208ce50bcc
 
 This prototype's SDK dependency is a fork-specific exception to upstream's
 dependency policy, not an upstream-approved commercial licensing arrangement.

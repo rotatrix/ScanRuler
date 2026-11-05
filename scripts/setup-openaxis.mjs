@@ -2,7 +2,7 @@
 import { cpSync, existsSync, mkdirSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { execFileSync } from 'node:child_process'
-const revision = '7b2af2b46946530c1a34be936943d6c499810fcc'
+const revision = '8f8b5e50e6eb1f3b15e2bd6ebaccc6208ce50bcc'
 const root = resolve(import.meta.dirname, '..')
 const source = resolve(process.argv[2] ?? `${root}/.openaxis/source`)
 const run = (command, args, cwd) => {

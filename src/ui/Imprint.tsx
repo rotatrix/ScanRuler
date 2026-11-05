@@ -36,10 +36,10 @@ export function ImprintModal() {
         <h3>About this preview</h3><p>This preview is furnished by Icebound Flame LLC. ScanRuler is the original work of Stefan Hermann (CNC Kitchen).</p><p><a href="https://github.com/rotatrix/ScanRuler/tree/codex/scanruler-preview">Preview source code</a></p>
         <p>
           Local Rotatrix integration prototype. OpenAxis SDK 1.0.0-rc.1,
-          revision 7b2af2b46946530c1a34be936943d6c499810fcc, used under GPLv3.{' '}
+          revision 8f8b5e50e6eb1f3b15e2bd6ebaccc6208ce50bcc, used under GPLv3.{' '}
           <a href={import.meta.env.BASE_URL + "licenses/openaxis/LICENSE"}>SDK license</a>{' · '}
           <a href={import.meta.env.BASE_URL + "licenses/openaxis/LEGAL.md"}>SDK notices</a>{' · '}
-          <a href="https://github.com/rotatrix/openaxis/tree/7b2af2b46946530c1a34be936943d6c499810fcc">SDK source</a>.
+          <a href="https://github.com/rotatrix/openaxis/tree/8f8b5e50e6eb1f3b15e2bd6ebaccc6208ce50bcc">SDK source</a>.
           Navigation exchanges camera and scene facts with the local Rotatrix app.
         </p>
         {notices.length > 0 && (

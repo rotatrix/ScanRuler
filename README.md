@@ -1,3 +1,11 @@
+# Rotatrix for ScanRuler
+
+An unofficial preview from Icebound Flame LLC that adds OpenAxis controller navigation to ScanRuler by Stefan Hermann (CNC Kitchen). Start Rotatrix on your computer, open the preview, and load a scan.
+
+[Open the preview](https://rotatrix.github.io/ScanRuler/) · [Build the integration locally](docs/openaxis.md) · [Upstream ScanRuler](https://github.com/CNCKitchen/ScanRuler)
+
+---
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/brand/scanruler-logo-horizontal-on-dark.svg" />
   <img src="docs/brand/scanruler-logo-horizontal.svg" alt="ScanRuler by CNC Kitchen" width="420" />

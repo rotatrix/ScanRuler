@@ -33,42 +33,15 @@ export function ImprintModal() {
           ScanRuler v{APP_VERSION} — quote the number when reporting a problem.
         </p>
 
-        <h3>Imprint (Impressum)</h3>
+        <h3>About this preview</h3><p>This preview is furnished by Icebound Flame LLC. ScanRuler is the original work of Stefan Hermann (CNC Kitchen).</p><p><a href="https://github.com/rotatrix/ScanRuler/tree/codex/scanruler-preview">Preview source code</a></p>
         <p>
           Local Rotatrix integration prototype. OpenAxis SDK 1.0.0-rc.1,
           revision 7b2af2b46946530c1a34be936943d6c499810fcc, used under GPLv3.{' '}
-          <a href="/licenses/openaxis/LICENSE">SDK license</a>{' · '}
-          <a href="/licenses/openaxis/LEGAL.md">SDK notices</a>{' · '}
+          <a href={import.meta.env.BASE_URL + "licenses/openaxis/LICENSE"}>SDK license</a>{' · '}
+          <a href={import.meta.env.BASE_URL + "licenses/openaxis/LEGAL.md"}>SDK notices</a>{' · '}
           <a href="https://github.com/rotatrix/openaxis/tree/7b2af2b46946530c1a34be936943d6c499810fcc">SDK source</a>.
           Navigation exchanges camera and scene facts with the local Rotatrix app.
         </p>
-        <p>
-          CNC Kitchen
-          <br />
-          Stefan Hermann
-          <br />
-          Bahnhofstr. 2
-          <br />
-          88145 Hergatz
-          <br />
-          Germany
-        </p>
-        <p>
-          Email: <a href="mailto:contact@cnckitchen.com">contact@cnckitchen.com</a>
-          <br />
-          Phone: <a href="tel:+491752011824">+49 175 2011824</a>
-          <br />
-          <span className="dim">
-            The phone number is for legal/business inquiries only — not for support.
-          </span>
-        </p>
-        <p>
-          EU Online Dispute Resolution platform:{' '}
-          <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">
-            ec.europa.eu/consumers/odr
-          </a>
-        </p>
-
         {notices.length > 0 && (
           <>
             <h3>Third-party software</h3>
@@ -78,26 +51,9 @@ export function ImprintModal() {
           </>
         )}
 
-        <h3>Privacy Policy (Datenschutzerklärung)</h3>
-        <p>
-          Responsible party (Verantwortlicher gem. Art. 4 Abs. 7 DSGVO): Stefan Hermann,
-          Bahnhofstr. 2, 88145 Hergatz, Germany.
-        </p>
+        <h3>Privacy</h3>
         <ul>
-          <li>
-            This website is hosted on Cloudflare (Cloudflare, Inc., 101 Townsend St, San
-            Francisco, CA 94107, USA). When you visit this site, Cloudflare may process your IP
-            address in server logs to deliver the site and protect it against attacks. Legal
-            basis: Art. 6(1)(f) DSGVO (legitimate interest in providing the website). See{' '}
-            <a
-              href="https://www.cloudflare.com/privacypolicy/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Cloudflare’s Privacy Policy
-            </a>
-            .
-          </li>
+          <li>GitHub Pages hosts this preview. See the <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub privacy statement</a>.</li>
           <li>
             Your scans, reference models, fitted elements and every measurement made from them
             are processed entirely in your browser. They are held in memory for the duration of
@@ -108,10 +64,7 @@ export function ImprintModal() {
             itself sends none of this anywhere and has no part in that processing.
           </li>
           <li>
-            The only things this tool stores on your device are four preferences — your chosen
-            mouse navigation scheme, viewport colour scheme, STEP export style, and whether the
-            guided hints are shown and which workspaces you have already been through — kept in
-            your browser’s localStorage. No personal data is stored.
+            This preview stores interface preferences and whether you dismissed its welcome in your browser’s local storage.
           </li>
           <li>This website does not use cookies, analytics, or any tracking technologies.</li>
           <li>

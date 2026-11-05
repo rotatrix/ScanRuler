@@ -33,7 +33,7 @@ export function ImprintModal() {
           ScanRuler v{APP_VERSION} — quote the number when reporting a problem.
         </p>
 
-        <h3>About this preview</h3><p>This preview is furnished by Icebound Flame LLC. ScanRuler is the original work of Stefan Hermann (CNC Kitchen).</p><p><a href="https://github.com/rotatrix/ScanRuler/tree/codex/scanruler-preview">Preview source code</a></p>
+        <h3>About this preview</h3><p>This preview is furnished by Icebound Flame LLC. ScanRuler is the original work of Stefan Hermann (CNC Kitchen).</p><p><a href="https://github.com/rotatrix/ScanRuler/tree/rotatrix-preview">Preview source code</a></p>
         <p>
           Local Rotatrix integration prototype. OpenAxis SDK 1.0.0-rc.1,
           revision 8f8b5e50e6eb1f3b15e2bd6ebaccc6208ce50bcc, used under GPLv3.{' '}

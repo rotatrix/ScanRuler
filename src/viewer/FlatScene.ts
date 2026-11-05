@@ -81,6 +81,7 @@ const dimTextPx = (value: string) => value.length * 7.6
 export class FlatScene {
   private viewport: OrthoViewport
   private material: THREE.MeshBasicMaterial
+  private sheetRevision = 0
   private geometry = new THREE.PlaneGeometry(1, 1)
   private sheet: THREE.Mesh
   private texture: THREE.Texture | null = null
@@ -267,6 +268,8 @@ export class FlatScene {
     this.viewport = new OrthoViewport(container, {
       theme,
       transparent: opts.transparent,
+      planar: true,
+      documentRevision: () => this.sheetRevision,
       navTargets: () => (this.sheet.visible ? [this.sheet] : []),
       onClick: (x, y, e) => {
         const p = this.pick(x, y)
@@ -1697,6 +1700,7 @@ export class FlatScene {
     this.material.depthWrite = true
     this.material.needsUpdate = true
 
+    this.sheetRevision++
     this.sheet.visible = true
     this.bounds = this.imageBounds()
     this.layoutSheet()
@@ -1723,6 +1727,7 @@ export class FlatScene {
     this.material.needsUpdate = true
     this.imagePx = { width: 0, height: 0 }
     this.mmPerPx = { x: 1, y: 1 }
+    this.sheetRevision++
     this.sheet.visible = true
     this.bounds = { x0: min[0], y0: min[1], x1: max[0], y1: max[1] }
     this.layoutSheet()

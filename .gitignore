@@ -1,4 +1,8 @@
 node_modules/
+.openaxis/
+public/licenses/openaxis/
+*-tests.log
+*-build.log
 dist/
 .wrangler/
 *.local

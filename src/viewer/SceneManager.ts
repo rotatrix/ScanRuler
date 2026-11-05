@@ -10,6 +10,7 @@
 
 import * as THREE from 'three'
 import type { LinkedView } from './cameraLink'
+import type { NavigationHost } from './navigationHost'
 import { OrthoViewport, STANDARD_VIEWS, viewAcross, type StandardView } from './orthoViewport'
 import { AxisGizmo, type GizmoAxis } from './axisGizmo'
 import { DatumStage } from './datumStage'
@@ -444,13 +445,11 @@ export class SceneManager {
       // deviation workspace the scan can be hidden behind the reference, or
       // the other way round, and turning about a surface nobody can see reads
       // as a glitch. Whatever a plugin shows in the scan's place counts too.
-      navTargets: () => {
-        const targets: THREE.Object3D[] = []
-        if (this.mesh?.visible) targets.push(this.mesh)
-        if (this.nominalMesh?.visible) targets.push(this.nominalMesh)
-        for (const layer of this.layers) targets.push(...(layer.navTargets?.() ?? []))
-        return targets
-      },
+      navTargets: () => this.navigationTargets(),
+      suspended: () => !!this.sheetFollow,
+      selection: () => this.mesh?.visible && this.regions.paintCount ? {
+        mesh: this.mesh, vertices: () => this.paintedVertices(), graphVertex: this.graphVertex,
+      } : undefined,
       onPointerDown: (e) => this.handlePointerDown(e),
       // A pan or a pinch beginning under a live brush stroke: the stroke keeps
       // what it took and ends there, rather than being dragged across the part
@@ -2982,6 +2981,18 @@ export class SceneManager {
   }
 
   // ---- the plugins' layers -----------------------------------------------------
+
+  private navigationTargets(): THREE.Object3D[] {
+    const targets: THREE.Object3D[] = []
+    if (this.mesh?.visible) targets.push(this.mesh)
+    if (this.nominalMesh?.visible) targets.push(this.nominalMesh)
+    for (const layer of this.layers) targets.push(...(layer.navTargets?.() ?? []))
+    return targets
+  }
+
+  navigationHost(): NavigationHost {
+    return this.viewport.navigationHost
+  }
 
   /** Add a plugin's layer — see sceneLayers.ts. The returned function takes
    *  it away again, disposing it. */

@@ -35,6 +35,14 @@ export function ImprintModal() {
 
         <h3>Imprint (Impressum)</h3>
         <p>
+          Local Rotatrix integration prototype. OpenAxis SDK 1.0.0-rc.1,
+          revision 7b2af2b46946530c1a34be936943d6c499810fcc, used under GPLv3.{' '}
+          <a href="/licenses/openaxis/LICENSE">SDK license</a>{' · '}
+          <a href="/licenses/openaxis/LEGAL.md">SDK notices</a>{' · '}
+          <a href="https://github.com/rotatrix/openaxis/tree/7b2af2b46946530c1a34be936943d6c499810fcc">SDK source</a>.
+          Navigation exchanges camera and scene facts with the local Rotatrix app.
+        </p>
+        <p>
           CNC Kitchen
           <br />
           Stefan Hermann

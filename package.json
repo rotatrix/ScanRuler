@@ -73,6 +73,7 @@
     "e2e:reverse-save": "node plugins/reverse/scripts/e2e-reverse-save.mjs"
   },
   "dependencies": {
+    "@openaxis/sdk": "file:.openaxis/sdk",
     "fflate": "^0.8.3",
     "manifold-3d": "3.2.1",
     "meshoptimizer": "1.2.0",

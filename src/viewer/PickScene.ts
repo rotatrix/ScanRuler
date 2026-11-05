@@ -77,6 +77,9 @@ export class PickScene {
     this.viewport = new OrthoViewport(container, {
       theme,
       navTargets: () => [this.mesh],
+      selection: () => channel?.regions.paintCount ? {
+        mesh: this.mesh, vertices: () => channel.regions.paintedVertices(), graphVertex: channel.graphVertex,
+      } : undefined,
       onPointerDown: (e) =>
         this.marking != null && this.marking.pointerGesture() !== null
           ? this.marking.handlePointerDown(e)

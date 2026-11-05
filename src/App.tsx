@@ -8,6 +8,7 @@
 // its edges, project files, each plugin's hook (called in the same order
 // every render) and the agent connection.
 
+import { attachOpenAxis } from './integrations/openaxis/runtime'
 import { useEffect, useMemo, useRef } from 'react'
 import { useProjectHistory } from './app/useProjectHistory'
 import { clearHistory, historyAction } from './state/historyStore'
@@ -62,7 +63,7 @@ import { ImprintModal } from './ui/Imprint'
 import { SettingsModal } from './ui/SettingsModal'
 import { UnitsModal } from './ui/UnitsModal'
 import { SupportAsk, SupportCard } from './ui/SupportCard'
-import { ViewBar } from './ui/ViewBar'
+import { OpenAxisDiagnosticsToggle, ViewBar } from './ui/ViewBar'
 import { DeviationPanel } from './ui/DeviationPanel'
 import { ThicknessPanel } from './ui/ThicknessPanel'
 import { FlatPanel } from './ui/FlatPanel'
@@ -119,6 +120,7 @@ const NO_RUNTIME: PluginRuntime = {}
 const CREASE_SETTLE_MS = 250
 
 export default function App() {
+  useEffect(attachOpenAxis, [])
   const clientRef = useRef<MeshWorkerClient | null>(null)
   if (!clientRef.current) clientRef.current = new MeshWorkerClient()
   const sceneRef = useRef<SceneManager | null>(null)
@@ -1798,6 +1800,7 @@ export default function App() {
               the bar's switches to act on. */}
           <div className="stagecorner">
             {!picking && <SupportCard />}
+            {(picking || onFlat) && <div className="viewbar"><div className="viewrow"><OpenAxisDiagnosticsToggle /></div></div>}
             {!picking && !onFlat && <ViewBar partKeys={active?.partKeys} sideKeys={active?.viewKeys} scanKey={active?.scanKey} hideModelKeys={active?.hideModelKeys} viewDirection={() => sceneRef.current?.viewDirection() ?? [0, 0, -1]} stageCentre={() => sceneRef.current?.stageCentre() ?? [0, 0, 0]} />}
           </div>
           {/* With no card on the stage any more, the step that is still

@@ -11,7 +11,8 @@
 // is set once and left — the colour mode, the mouse controls — is in
 // Settings instead.
 
-import type { ReactNode } from 'react'
+import { useSyncExternalStore, type ReactNode } from 'react'
+import { diagnosticsSnapshot, subscribeDiagnostics, toggleDiagnostics } from '../integrations/openaxis/runtime'
 import type { Vec3 } from '../core/types'
 import type { PluginRuntime } from '../plugins/api'
 import { useDeviation } from '../state/deviationStore'
@@ -21,6 +22,11 @@ import { useStore } from '../state/store'
 import { Icon } from './icons'
 import { anyChanged, PartKey, PartOption, type ViewSwitch } from './PartKey'
 import { SectionViewKeys } from './SectionViewKeys'
+
+export function OpenAxisDiagnosticsToggle() {
+  const diagnostics = useSyncExternalStore(subscribeDiagnostics, diagnosticsSnapshot)
+  return <button type="button" aria-pressed={diagnostics} onClick={toggleDiagnostics}>OpenAxis Diagnostics</button>
+}
 
 export function ViewBar({
   partKeys,
@@ -140,6 +146,7 @@ export function ViewBar({
     <div className="viewbar" data-test="view-bar">
       {!hideModelKeys && sectionOn && <SectionViewKeys viewDirection={viewDirection} />}
       <div className="viewrow">
+        <OpenAxisDiagnosticsToggle />
         {/* What is on the stage. Not with the sheet alone on it. */}
         {!hideModelKeys && (
           <div className="keys" data-test="part-keys">

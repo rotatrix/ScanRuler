@@ -21,6 +21,9 @@ import {
   spaceMouseAttached,
 } from './spaceMouse'
 import type { ViewTheme } from './viewThemes'
+import { readNavigationCamera, writeNavigationCamera } from './navigationCamera'
+import { registerNavigationHost } from './navigationViews'
+import type { NavigationCamera, NavigationHost, NavigationBounds, Triple } from './navigationHost'
 
 /** Breathing room around a framed part. One value for every viewport: the
  *  split picker used to frame at 1.1 while the main view sat at 1.08, which
@@ -113,6 +116,10 @@ export const viewAcross = (extent: { halfW: number; halfH: number }, aspect: num
 }
 
 export interface OrthoViewportOptions {
+  planar?: boolean
+  suspended?(): boolean
+  documentRevision?(): number
+  selection?(): { mesh: THREE.Mesh; vertices(): Uint32Array; graphVertex(index: number): number } | undefined
   /** Stage and lights — see viewThemes. One scheme across every viewport: two
    *  halves of a split view lit differently would read as two instruments. */
   theme: ViewTheme
@@ -140,6 +147,8 @@ export interface OrthoViewportOptions {
 }
 
 export class OrthoViewport {
+  readonly navigationHost: NavigationHost
+  private unregisterNavigation: () => void
   readonly renderer: THREE.WebGLRenderer
   readonly labelRenderer: CSS2DRenderer
   readonly scene = new THREE.Scene()
@@ -199,6 +208,17 @@ export class OrthoViewport {
 
   invalidate = (): void => {
     this.needsRender = true
+  }
+
+  writeNavigation(pose: NavigationCamera, pivot?: Triple): boolean {
+    const requested = this.opts.planar ? { ...pose, quaternion: this.camera.quaternion.toArray() } : pose
+    const ok = writeNavigationCamera(this.camera, this.controls.target, requested, pivot)
+    if (!ok) return false
+    this.flight = null
+    this.nav.updateClipPlanes()
+    this.controls.update()
+    this.invalidate()
+    return true
   }
 
   constructor(private container: HTMLDivElement, private opts: OrthoViewportOptions) {
@@ -317,6 +337,127 @@ export class OrthoViewport {
     // mid-constructor here, and its tick hooks reach for modules it has not
     // built yet. The first frame is one rAF away either way.
     this.rafId = requestAnimationFrame(animate)
+    this.navigationHost = this.createNavigationHost()
+    this.unregisterNavigation = registerNavigationHost(this.navigationHost)
+  }
+
+  private createNavigationHost(): NavigationHost {
+    let alive = true
+    let key = ''
+    let token = {}
+    const boundsOf = (object: THREE.Object3D): NavigationBounds | undefined => {
+      object.updateWorldMatrix(true, true)
+      const box = new THREE.Box3().setFromObject(object)
+      return box.isEmpty() ? undefined : { min: box.min.toArray(), max: box.max.toArray() }
+    }
+    const selectedBounds = (): NavigationBounds | undefined => {
+      const selection = this.opts.selection?.()
+      if (!selection) return undefined
+      const vertices = selection.vertices()
+      const positions = selection.mesh.geometry.getAttribute('position')
+      selection.mesh.updateWorldMatrix(true, false)
+      const box = new THREE.Box3()
+      const point = new THREE.Vector3()
+      for (const vertex of vertices) box.expandByPoint(point.fromBufferAttribute(positions, vertex).applyMatrix4(selection.mesh.matrixWorld))
+      return box.isEmpty() ? undefined : { min: box.min.toArray(), max: box.max.toArray() }
+    }
+    const pivot = new THREE.Group()
+    for (const hidden of [false, true]) {
+      for (const rim of [false, true]) {
+        const piece = new THREE.Mesh(
+          rim ? new THREE.RingGeometry(4, 5.5, 48) : new THREE.CircleGeometry(4, 48),
+          new THREE.MeshBasicMaterial({ color: rim ? 0 : 0x00ff00, depthWrite: false,
+            depthFunc: hidden ? THREE.GreaterDepth : THREE.LessEqualDepth,
+            transparent: true, opacity: hidden ? 0.22 : 1, toneMapped: false }),
+        )
+        piece.renderOrder = hidden ? 1001 : 1000
+        pivot.add(piece)
+      }
+    }
+    pivot.visible = false
+    this.scene.add(pivot)
+    let pivotPoint: Triple | undefined
+    const updatePivot = () => {
+      if (!alive || !pivotPoint) return
+      pivot.position.fromArray(pivotPoint)
+      pivot.quaternion.copy(this.camera.quaternion)
+      pivot.scale.setScalar(this.worldPerPixel())
+      const p = pivot.position.clone().project(this.camera)
+      pivot.visible = !this.paused && Math.abs(p.x) <= 1 && Math.abs(p.y) <= 1 && Math.abs(p.z) <= 1
+      this.invalidate()
+    }
+    this.controls.addEventListener('change', updatePivot)
+    const eligible = () => alive && !this.paused && !this.opts.suspended?.() && this.container.clientWidth > 0 && this.container.clientHeight > 0
+    return {
+      eligible,
+      viewspace: this.opts.planar ? '2d' : '3d',
+      canvas: this.renderer.domElement,
+      container: this.container,
+      context: () => {
+        if (!eligible()) return undefined
+        const targets = this.opts.navTargets()
+        // Unsupported/empty scenes cannot accidentally navigate a hidden document.
+        if (!targets.length) return undefined
+        const next = String(this.opts.documentRevision?.() ?? 0) + targets.map(target => {
+          target.updateWorldMatrix(true, true)
+          const geometry = (target as THREE.Mesh).geometry
+          const position = geometry?.getAttribute('position')
+          const version = position && ('version' in position ? position.version : position.data.version)
+          return `${target.uuid}:${geometry?.uuid}:${version}:${geometry?.index?.version}:${target.matrixWorld.elements.join(',')}`
+        }).join('|') + `:${this.container.clientWidth}:${this.container.clientHeight}`
+        if (next !== key) { key = next; token = {} }
+        updatePivot()
+        return token
+      },
+      readCamera: () => readNavigationCamera(this.camera),
+      writeCamera: (pose, point) => alive && this.writeNavigation(pose, point),
+      bounds: selected => {
+        if (selected) return selectedBounds()
+        const box = new THREE.Box3()
+        for (const target of this.opts.navTargets()) {
+          const bounds = boundsOf(target)
+          if (bounds) box.union(new THREE.Box3(new THREE.Vector3(...bounds.min), new THREE.Vector3(...bounds.max)))
+        }
+        return box.isEmpty() ? undefined : { min: box.min.toArray(), max: box.max.toArray() }
+      },
+      hasSelection: () => !!this.opts.selection?.(),
+      pick: (x, y, selected) => {
+        const rc = new THREE.Raycaster()
+        this.nav.setPickRay(rc, x, y)
+        const selection = selected ? this.opts.selection?.() : undefined
+        if (selected && !selection) return undefined
+        const targets = selection ? [selection.mesh] : this.opts.navTargets()
+        const marked = selection && new Set(selection.vertices())
+        for (const hit of rc.intersectObjects(targets, true)) {
+          if (marked && selection) {
+            const index = selection.mesh.geometry.getIndex()
+            if (!index || hit.faceIndex == null) continue
+            // A selected triangle has all three vertices in the marked region.
+            if (![0, 1, 2].every(i => marked.has(selection.graphVertex(index.getX(hit.faceIndex! * 3 + i))))) continue
+          }
+          return { point: hit.point.toArray(), bounds: selected ? selectedBounds() : boundsOf(hit.object) }
+        }
+        return undefined
+      },
+      project: point => new THREE.Vector3(...point).project(this.camera).toArray(),
+      showPivot: point => {
+        pivotPoint = point
+        pivot.visible = false
+        updatePivot()
+        if (alive) this.invalidate()
+      },
+      dispose: () => {
+        alive = false
+        this.controls.removeEventListener('change', updatePivot)
+        pivot.removeFromParent()
+        for (const child of pivot.children) {
+          const mesh = child as THREE.Mesh<THREE.BufferGeometry, THREE.Material>
+          mesh.geometry.dispose()
+          mesh.material.dispose()
+        }
+        this.invalidate()
+      },
+    }
   }
 
   /** One frame drawn now, out of the browser's turn — while the tab is
@@ -818,6 +959,8 @@ export class OrthoViewport {
   }
 
   dispose(): void {
+    this.unregisterNavigation()
+    this.navigationHost.dispose()
     cancelAnimationFrame(this.rafId)
     releaseSpaceMouse(this)
     this.resizeObserver.disconnect()
